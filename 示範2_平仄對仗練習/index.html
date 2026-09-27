@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3b2722">
+  <title>平仄對仗練習</title>
+  <style>
+    :root {
+      --ink: #2f2520;
+      --ink-soft: #665247;
+      --paper: #f6ecd4;
+      --paper-deep: #e9d3a4;
+      --indigo: #354c60;
+      --cinnabar: #a9362e;
+      --gold: #b88943;
+      --shadow: rgba(38, 24, 17, .28);
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "DFKai-SB", "BiauKai", "標楷體", "Noto Serif TC", serif;
+      background: #c9aa78 url("assets/images/study-background.png") center / cover fixed no-repeat;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(90deg, rgba(28,18,14,.22), rgba(255,244,211,.05) 35% 65%, rgba(28,18,14,.22));
+    }
+    button { font: inherit; }
+    .app {
+      min-height: 100dvh;
+      width: min(1120px, 100%);
+      margin: auto;
+      padding: 20px clamp(12px, 3vw, 34px) 28px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 12px;
+    }
+    .title-wrap {
+      width: min(620px, 82vw);
+      aspect-ratio: 2.25 / 1;
+      max-height: 146px;
+      margin: -8px auto -16px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      filter: drop-shadow(0 8px 6px var(--shadow));
+    }
+    .title-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    h1 {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 7%;
+      color: #f8e7b8;
+      font-size: clamp(1.65rem, 5vw, 2.8rem);
+      letter-spacing: .18em;
+      text-shadow: 0 2px 2px #26120d, 0 0 7px #26120d;
+      transform: translateX(.08em);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      border: 1px solid rgba(87,55,32,.42);
+      border-radius: 14px;
+      background: rgba(247,236,211,.88);
+      box-shadow: 0 5px 18px var(--shadow), inset 0 0 18px rgba(132,91,47,.1);
+      backdrop-filter: blur(5px);
+    }
+    .progress-text, .score-text { font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
+    .progress-track { flex: 1; height: 12px; max-width: 430px; border-radius: 999px; background: #d5c39c; box-shadow: inset 0 2px 4px #8b7358; overflow: hidden; }
+    .progress-fill { width: 20%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #48677e, #7890a0); transition: width .35s ease; }
+    .game-card {
+      position: relative;
+      min-height: 560px;
+      padding: clamp(24px, 4vw, 48px) clamp(18px, 6vw, 72px) 30px;
+      border: 1px solid rgba(95,62,36,.4);
+      border-radius: 22px;
+      background: rgba(246,236,212,.92);
+      box-shadow: 0 16px 38px rgba(35,20,12,.36), inset 0 0 42px rgba(134,91,40,.13);
+      overflow: hidden;
+    }
+    .game-card::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(163,126,70,.36);
+      border-radius: 15px;
+      pointer-events: none;
+    }
+    .corner-art { position: absolute; z-index: 0; pointer-events: none; user-select: none; }
+    .treasures { width: clamp(150px, 24vw, 260px); right: -18px; bottom: -22px; opacity: .9; }
+    .scroll-art { width: min(92%, 920px); height: 230px; left: 4%; top: 67px; object-fit: fill; opacity: .56; }
+    .game-content { position: relative; z-index: 1; }
+    .instruction { margin: 0 auto 16px; text-align: center; color: var(--ink-soft); font-size: clamp(.96rem, 2.3vw, 1.1rem); }
+    .couplet-board { min-height: 185px; display: grid; place-content: center; gap: 18px; padding: 20px 8px; }
+    .line {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      font-size: clamp(1.42rem, 4.8vw, 2.35rem);
+      line-height: 1.35;
+      letter-spacing: .06em;
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 1px #fff8e9;
+    }
+    .line-label {
+      margin-right: 6px;
+      color: var(--cinnabar);
+      font-size: .7em;
+      letter-spacing: .05em;
+      writing-mode: vertical-rl;
+    }
+    .slot {
+      position: relative;
+      min-width: clamp(82px, 15vw, 145px);
+      min-height: 58px;
+      padding: 8px 12px;
+      display: inline-grid;
+      place-items: center;
+      border: 2px dashed #9f6b59;
+      border-radius: 4px;
+      color: transparent;
+      background-color: rgba(255,250,232,.6);
+      background-image:
+        linear-gradient(45deg, transparent 49%, rgba(163,75,62,.25) 50%, transparent 51%),
+        linear-gradient(-45deg, transparent 49%, rgba(163,75,62,.25) 50%, transparent 51%),
+        linear-gradient(90deg, transparent 49%, rgba(163,75,62,.22) 50%, transparent 51%),
+        linear-gradient(transparent 49%, rgba(163,75,62,.22) 50%, transparent 51%);
+      transition: transform .16s, border-color .16s, background-color .16s;
+    }
+    .slot::after { content: "拖到這裡"; color: #8e7768; font: 600 .9rem/1 sans-serif; letter-spacing: .05em; }
+    .slot.target { transform: scale(1.045); border-color: var(--cinnabar); background-color: #fff8dc; }
+    .slot.locked { color: var(--ink); border: 2px solid rgba(157,55,45,.48); background-color: rgba(250,238,204,.88); }
+    .slot.locked::after { content: ""; }
+    .slot .mini-seal { position: absolute; width: 42px; height: 42px; object-fit: contain; right: -23px; top: -21px; animation: stamp .36s cubic-bezier(.2,.9,.35,1.4); }
+    @keyframes stamp { from { transform: scale(2.2) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: .93; } }
+    .divider { width: min(560px, 76%); margin: 3px auto 16px; height: 1px; background: linear-gradient(90deg, transparent, #9c7754, transparent); }
+    .bank-title { margin: 0 0 12px; text-align: center; font-size: 1.03rem; color: var(--indigo); letter-spacing: .12em; }
+    .card-bank { min-height: 118px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; padding: 7px 12px 18px; }
+    .word-card {
+      position: relative;
+      min-width: 88px;
+      min-height: 52px;
+      padding: 10px 17px;
+      border: 1px solid #9e8464;
+      border-radius: 3px 8px 4px 7px;
+      color: var(--ink);
+      background: #f8edce;
+      box-shadow: 2px 4px 7px rgba(54,36,23,.23), inset 0 0 12px rgba(145,106,51,.12);
+      font-size: clamp(1.08rem, 3vw, 1.34rem);
+      font-weight: 700;
+      letter-spacing: .08em;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+    }
+    .word-card:nth-child(even) { transform: rotate(.7deg); }
+    .word-card:nth-child(3n) { transform: rotate(-.8deg); }
+    .word-card:hover, .word-card.selected { transform: translateY(-4px) rotate(0); box-shadow: 3px 8px 13px rgba(54,36,23,.3); outline: 3px solid rgba(169,54,46,.18); }
+    .word-card:active { cursor: grabbing; }
+    .word-card.used { opacity: 0; visibility: hidden; pointer-events: none; }
+    .drag-ghost { position: fixed; z-index: 9999; pointer-events: none; transform: translate(-50%, -50%) rotate(-2deg) scale(1.04); opacity: .94; }
+    .feedback { min-height: 32px; margin: 0; text-align: center; font: 700 1rem/1.5 "Noto Sans TC", sans-serif; }
+    .feedback.good { color: #26603c; }
+    .feedback.bad { color: #a12f27; }
+    .shake { animation: shake .34s; }
+    @keyframes shake { 25% { transform: translateX(-7px); } 50% { transform: translateX(7px); } 75% { transform: translateX(-4px); } }
+    .explanation {
+      display: none;
+      margin: 5px auto 8px;
+      padding: 15px 18px;
+      max-width: 760px;
+      border-left: 4px solid var(--cinnabar);
+      border-radius: 5px;
+      background: rgba(255,248,224,.75);
+      line-height: 1.75;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+    .explanation.show { display: block; animation: rise .35s ease; }
+    .full-couplet { margin-bottom: 5px; color: var(--indigo); font-family: "DFKai-SB", "標楷體", serif; font-size: 1.15rem; font-weight: 700; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+    .actions { display: flex; justify-content: center; margin-top: 14px; }
+    .primary {
+      min-width: 148px;
+      padding: 11px 24px;
+      border: 1px solid #6b2b26;
+      border-radius: 999px;
+      color: #fff7df;
+      background: linear-gradient(#b44b3e, #8f2e28);
+      box-shadow: 0 5px 0 #63231f, 0 8px 13px rgba(52,27,20,.25);
+      font-weight: 700;
+      letter-spacing: .08em;
+      cursor: pointer;
+    }
+    .primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .primary:active { transform: translateY(3px); box-shadow: 0 2px 0 #63231f; }
+    .primary[hidden] { display: none; }
+    .result { display: none; min-height: 480px; place-items: center; text-align: center; }
+    .result.show { display: grid; }
+    .result-inner { max-width: 620px; }
+    .result-seal { width: 145px; height: 145px; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(80,29,22,.22)); }
+    .result h2 { margin: 4px 0 8px; color: var(--cinnabar); font-size: clamp(2rem, 6vw, 3.1rem); }
+    .result-score { margin: 4px 0 12px; color: var(--indigo); font-size: 1.35rem; font-weight: 700; }
+    .result-note { margin: 0 auto 22px; line-height: 1.75; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 640px) {
+      body { background-attachment: scroll; }
+      .app { padding-top: 8px; gap: 8px; }
+      .title-wrap { width: min(500px, 96vw); margin-bottom: -25px; }
+      .topbar { padding: 8px 11px; }
+      .progress-track { height: 9px; }
+      .progress-text, .score-text { font-size: .9rem; }
+      .game-card { min-height: calc(100dvh - 158px); padding: 21px 12px 24px; border-radius: 16px; }
+      .scroll-art { width: 112%; left: -6%; top: 68px; height: 236px; }
+      .couplet-board { min-height: 194px; gap: 12px; padding-inline: 0; }
+      .line { gap: 4px; }
+      .line-label { margin-right: 1px; }
+      .slot { min-width: 76px; min-height: 51px; padding: 6px 8px; }
+      .slot::after { font-size: .72rem; }
+      .word-card { min-width: 76px; min-height: 48px; padding: 8px 12px; }
+      .card-bank { gap: 9px; padding-inline: 2px; }
+      .treasures { width: 150px; opacity: .28; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <a class="adventure-map-link" href="../對聯大冒險地圖/index.html">回到大地圖</a>
+  <style>.adventure-map-link{position:fixed;left:max(10px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));z-index:9999;padding:9px 13px;border:1px solid #6d5231;border-radius:7px;background:#f5e7c8ee;color:#3a2818;text-decoration:none;font-weight:800;box-shadow:0 3px 12px #0004}.adventure-map-link:focus-visible{outline:3px solid #a13d32;outline-offset:2px}@media(max-width:650px){.adventure-map-link{font-size:12px;padding:7px 9px}}</style>
+  <main class="app">
+    <header class="title-wrap">
+      <img src="assets/images/title-plaque.png" alt="古木雕刻標題牌">
+      <h1>平仄對仗練習</h1>
+    </header>
+
+    <section class="topbar" aria-label="遊戲進度">
+      <span class="progress-text" id="progressText">第 1／5 題</span>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="score-text" id="scoreText">得分 0</span>
+    </section>
+
+    <section class="game-card" id="playView">
+      <img class="corner-art scroll-art" src="assets/images/scroll.png" alt="" aria-hidden="true">
+      <img class="corner-art treasures" src="assets/images/four-treasures.png" alt="" aria-hidden="true">
+      <div class="game-content">
+        <p class="instruction">拖曳詞卡到米字格；手機也可先點詞卡，再點空格。</p>
+        <div class="couplet-board" id="coupletBoard" aria-live="polite"></div>
+        <div class="divider"></div>
+        <h2 class="bank-title">候選詞卡</h2>
+        <div class="card-bank" id="cardBank" aria-label="候選詞卡"></div>
+        <p class="feedback" id="feedback" role="status" aria-live="assertive"></p>
+        <div class="explanation" id="explanation">
+          <div class="full-couplet" id="fullCouplet"></div>
+          <div id="explainText"></div>
+        </div>
+        <div class="actions"><button class="primary" id="nextButton" type="button" hidden>下一題</button></div>
+      </div>
+    </section>
+
+    <section class="game-card result" id="resultView" aria-live="polite">
+      <div class="result-inner">
+        <img class="result-seal" src="assets/images/seal.png" alt="硃紅印章">
+        <h2>闖關完成</h2>
+        <p class="result-score" id="resultScore"></p>
+        <p class="result-note" id="resultNote"></p>
+        <button class="primary" id="restartButton" type="button">再試五題</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const QUESTIONS = [
+      {
+        upper: ["天增歲月", "人增壽"], lower: ["春滿", "乾坤", "福滿", "門"], blankSide: "lower", blanks: [0, 2],
+        choices: ["春滿", "福滿", "風暖", "喜臨", "花開", "月照"],
+        explain: "上下聯都用「增／滿」與「人／福」相互照應，祝賀新年增歲、家門添福。末字「壽」（仄）對「門」（平），讀來收束和諧。"
+      },
+      {
+        upper: ["一帆風順", "年年好"], lower: ["萬事如意", "步步高"], blankSide: "upper", blanks: [0, 1],
+        choices: ["一帆風順", "年年好", "四海昇平", "處處春", "萬事順心", "日日新"],
+        explain: "「一帆」對「萬事」，「年年」對「步步」，詞性與結構相稱；「好」（仄）與「高」（平）形成平仄相對。"
+      },
+      {
+        upper: ["綠竹", "別其", "三分景"], lower: ["紅梅", "正報", "萬家春"], blankSide: "lower", blanks: [0, 2],
+        choices: ["紅梅", "萬家春", "青松", "千里月", "黃菊", "滿園香"],
+        explain: "「綠竹」對「紅梅」是顏色加植物；「三分景」對「萬家春」是數量結構相對，也寫出歲末迎春的喜氣。"
+      },
+      {
+        upper: ["爆竹", "一聲", "除舊歲"], lower: ["桃符", "萬戶", "換新春"], blankSide: "upper", blanks: [0, 2],
+        choices: ["爆竹", "除舊歲", "桃花", "迎新春", "鐘鼓", "報平安"],
+        explain: "「爆竹」與「桃符」都是年節景物；「除舊歲」對「換新春」，動作與時間意象相應，呈現辭舊迎新。"
+      },
+      {
+        upper: ["春風", "放膽", "來梳柳"], lower: ["夜雨", "瞞人", "去潤花"], blankSide: "lower", blanks: [0, 2],
+        choices: ["夜雨", "去潤花", "曉霧", "來染葉", "秋月", "照寒梅"],
+        explain: "「春風」對「夜雨」，「梳柳」對「潤花」；把風雨擬人化，一明一暗，畫面活潑而對仗工整。"
+      },
+      {
+        upper: ["海納百川", "有容乃大"], lower: ["壁立千仞", "無欲則剛"], blankSide: "lower", blanks: [0, 1],
+        choices: ["壁立千仞", "無欲則剛", "山高萬丈", "有志竟成", "江流萬里", "心靜自安"],
+        explain: "「海納百川」對「壁立千仞」，一寫海、一寫峭壁；「有容」對「無欲」，以包容與自律勉勵人培養恢宏氣度。"
+      },
+      {
+        upper: ["書山", "有路", "勤為徑"], lower: ["學海", "無涯", "苦作舟"], blankSide: "upper", blanks: [0, 2],
+        choices: ["書山", "勤為徑", "文林", "志作梯", "墨池", "讀成章"],
+        explain: "「書山」對「學海」，「路」對「涯」，「徑」對「舟」；用登山、渡海比喻求學，強調勤奮刻苦。"
+      },
+      {
+        upper: ["寶劍鋒", "從磨礪出"], lower: ["梅花香", "自苦寒來"], blankSide: "lower", blanks: [0, 1],
+        choices: ["梅花香", "自苦寒來", "松柏翠", "因春風起", "桂子香", "從秋露生"],
+        explain: "「寶劍」對「梅花」，「磨礪」對「苦寒」；兩種事物都經考驗才顯珍貴，比喻成長需要磨鍊。"
+      },
+      {
+        upper: ["兩個黃鸝", "鳴翠柳"], lower: ["一行白鷺", "上青天"], blankSide: "upper", blanks: [0, 1],
+        choices: ["兩個黃鸝", "鳴翠柳", "一雙燕子", "入畫簷", "幾隻白鶴", "過青山"],
+        explain: "「兩個」對「一行」，「黃鸝」對「白鷺」，色彩、數量與鳥類相對；「鳴」寫聲音，「上」寫動態。"
+      },
+      {
+        upper: ["四面荷花", "三面柳"], lower: ["一城山色", "半城湖"], blankSide: "lower", blanks: [0, 1],
+        choices: ["一城山色", "半城湖", "滿園春色", "幾處亭", "千峰雲影", "一江秋"],
+        explain: "「四面／三面」對「一城／半城」，「荷花、柳」對「山色、湖」；數量與景物交錯，描寫濟南大明湖風光。"
+      }
+    ];
+
+    const el = id => document.getElementById(id);
+    const state = { questions: [], index: 0, score: 0, mistakes: 0, solved: 0, selectedCard: null, drag: null };
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startGame() {
+      state.questions = shuffle(QUESTIONS).slice(0, 5);
+      state.index = 0; state.score = 0; state.mistakes = 0; state.solved = 0; state.selectedCard = null;
+      el("resultView").classList.remove("show");
+      el("playView").style.display = "block";
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = state.questions[state.index];
+      state.solved = 0; state.selectedCard = null;
+      el("progressText").textContent = `第 ${state.index + 1}／5 題`;
+      el("progressFill").style.width = `${(state.index + 1) * 20}%`;
+      el("scoreText").textContent = `得分 ${state.score}`;
+      el("feedback").textContent = "";
+      el("feedback").className = "feedback";
+      el("explanation").classList.remove("show");
+      el("nextButton").hidden = true;
+      el("nextButton").textContent = state.index === 4 ? "看成績" : "下一題";
+      el("coupletBoard").replaceChildren(makeLine("上聯", q.upper, q.blankSide === "upper", q), makeLine("下聯", q.lower, q.blankSide === "lower", q));
+      const bank = el("cardBank");
+      bank.replaceChildren();
+      shuffle(q.choices).forEach(text => bank.appendChild(makeCard(text)));
+    }
+
+    function makeLine(label, parts, hasBlanks, q) {
+      const line = document.createElement("div");
+      line.className = "line";
+      const labelEl = document.createElement("span");
+      labelEl.className = "line-label"; labelEl.textContent = label;
+      line.appendChild(labelEl);
+      parts.forEach((part, i) => {
+        if (hasBlanks && q.blanks.includes(i)) {
+          const slot = document.createElement("button");
+          slot.type = "button"; slot.className = "slot"; slot.dataset.answer = part;
+          slot.setAttribute("aria-label", `空格：請填入第 ${q.blanks.indexOf(i) + 1} 個詞`);
+          slot.addEventListener("click", () => {
+            if (state.selectedCard && !slot.classList.contains("locked")) tryPlace(state.selectedCard, slot);
+          });
+          line.appendChild(slot);
+        } else {
+          const span = document.createElement("span"); span.textContent = part; line.appendChild(span);
+        }
+      });
+      return line;
+    }
+
+    function makeCard(text) {
+      const card = document.createElement("button");
+      card.type = "button"; card.className = "word-card"; card.textContent = text; card.dataset.value = text;
+      card.setAttribute("aria-label", `詞卡：${text}`);
+      card.addEventListener("click", () => selectCard(card));
+      card.addEventListener("pointerdown", beginDrag);
+      return card;
+    }
+
+    function selectCard(card) {
+      if (card.classList.contains("used")) return;
+      document.querySelectorAll(".word-card.selected").forEach(c => c.classList.remove("selected"));
+      if (state.selectedCard === card) { state.selectedCard = null; return; }
+      state.selectedCard = card; card.classList.add("selected");
+      el("feedback").textContent = `已選「${card.dataset.value}」，請點選一個米字格。`;
+      el("feedback").className = "feedback";
+    }
+
+    function beginDrag(event) {
+      if (event.button !== 0 && event.pointerType !== "touch") return;
+      const card = event.currentTarget;
+      state.drag = { card, startX: event.clientX, startY: event.clientY, moved: false, ghost: null };
+      card.setPointerCapture(event.pointerId);
+      card.addEventListener("pointermove", moveDrag);
+      card.addEventListener("pointerup", endDrag, { once: true });
+      card.addEventListener("pointercancel", endDrag, { once: true });
+    }
+
+    function moveDrag(event) {
+      const d = state.drag; if (!d) return;
+      if (!d.moved && Math.hypot(event.clientX - d.startX, event.clientY - d.startY) < 7) return;
+      if (!d.ghost) {
+        d.moved = true; d.ghost = d.card.cloneNode(true); d.ghost.className = "word-card drag-ghost"; document.body.appendChild(d.ghost);
+      }
+      d.ghost.style.left = `${event.clientX}px`; d.ghost.style.top = `${event.clientY}px`;
+      document.querySelectorAll(".slot.target").forEach(s => s.classList.remove("target"));
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".slot:not(.locked)");
+      if (target) target.classList.add("target");
+    }
+
+    function endDrag(event) {
+      const d = state.drag; if (!d) return;
+      d.card.removeEventListener("pointermove", moveDrag);
+      document.querySelectorAll(".slot.target").forEach(s => s.classList.remove("target"));
+      if (d.ghost) d.ghost.remove();
+      if (d.moved) {
+        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".slot:not(.locked)");
+        if (target) tryPlace(d.card, target);
+        event.preventDefault();
+      }
+      state.drag = null;
+    }
+
+    function tryPlace(card, slot) {
+      state.selectedCard = null;
+      document.querySelectorAll(".word-card.selected").forEach(c => c.classList.remove("selected"));
+      if (card.dataset.value === slot.dataset.answer) {
+        slot.textContent = card.dataset.value;
+        slot.classList.add("locked");
+        slot.disabled = true;
+        const seal = document.createElement("img"); seal.src = "assets/images/seal.png"; seal.alt = "答對紅章"; seal.className = "mini-seal"; slot.appendChild(seal);
+        card.classList.add("used");
+        state.solved += 1; state.score += 10;
+        el("scoreText").textContent = `得分 ${state.score}`;
+        el("feedback").textContent = "答對了，紅章落定！";
+        el("feedback").className = "feedback good";
+        if (state.solved === 2) completeQuestion();
+      } else {
+        state.mistakes += 1;
+        el("feedback").textContent = `「${card.dataset.value}」放在這裡不合適，再比一比詞性與意思。`;
+        el("feedback").className = "feedback bad";
+        card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+        slot.classList.remove("shake"); void slot.offsetWidth; slot.classList.add("shake");
+      }
+    }
+
+    function completeQuestion() {
+      const q = state.questions[state.index];
+      el("fullCouplet").textContent = `完整對聯：${q.upper.join("")}；${q.lower.join("")}。`;
+      el("explainText").textContent = q.explain;
+      el("explanation").classList.add("show");
+      el("feedback").textContent = "本題完成！看看對仗巧思，再前往下一題。";
+      el("nextButton").hidden = false;
+      el("nextButton").focus({ preventScroll: true });
+    }
+
+    function nextQuestion() {
+      if (state.index < 4) { state.index += 1; renderQuestion(); el("playView").scrollIntoView({ behavior: "smooth", block: "start" }); }
+      else showResult();
+    }
+
+    function showResult() {
+      localStorage.setItem("coupletAdventure.v1.seal.duel", "earned");
+      el("playView").style.display = "none";
+      el("resultView").classList.add("show");
+      el("resultScore").textContent = `總得分：${state.score}／100`;
+      const accuracy = Math.round(1000 / (10 + state.mistakes));
+      const message = state.mistakes === 0 ? "十格全對，一氣呵成！你已能掌握詞性、意思與平仄的照應。" :
+        state.mistakes <= 3 ? "表現穩健！再留意詞性相同、意思相關，以及上仄下平的收尾規律。" :
+        "已完成五題挑戰！重新抽題，多比較數量、顏色、動作與景物的對應。";
+      el("resultNote").textContent = `${message} 本局嘗試正確率約 ${accuracy}%。`;
+      el("progressText").textContent = "五題完成";
+      el("progressFill").style.width = "100%";
+      el("scoreText").textContent = `得分 ${state.score}`;
+    }
+
+    el("nextButton").addEventListener("click", nextQuestion);
+    el("restartButton").addEventListener("click", startGame);
+    startGame();
+  </script>
+</body>
+</html>

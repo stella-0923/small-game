@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>對聯大冒險｜古圖尋印</title>
+  <style>
+    :root{color-scheme:dark;--ink:#20160d;--paper:#ead8ad;--paper2:#caaa72;--gold:#d8b760;--red:#8d3026;--green:#315e43;--cream:#fff3cf}
+    *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{overflow:hidden;background:#17110b;color:var(--cream);font-family:"Microsoft JhengHei","Noto Serif TC",serif}button,a{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+    .cover{position:fixed;inset:0;z-index:50;border:0;padding:0;width:100%;height:100%;color:var(--cream);background:#0e0a06;overflow:hidden;opacity:1;transition:opacity .55s ease}.cover img{display:block;width:100%;height:100%;object-fit:contain}.cover:focus-visible{outline:3px solid #f9d786;outline-offset:-5px}.cover.fade{opacity:0;pointer-events:none}
+    .map-screen{position:fixed;inset:0;display:grid;place-items:center;background:#17110b}.map-frame{position:relative;width:min(100vw,177.777778vh);aspect-ratio:16/9}.map-art{display:block;width:100%;height:100%;object-fit:contain}
+    .hud{position:fixed;z-index:8;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px;align-items:center}.counter,.clear{border:1px solid #c9a45b;background:#21170ee8;color:#f7e5b7;border-radius:8px;padding:9px 13px;box-shadow:0 3px 12px #0008;font-weight:700}.clear{border-color:#985047;color:#ffd3c9}.clear:hover,.clear:focus-visible{background:#4a201b}
+    .map-title{position:fixed;z-index:7;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));margin:0;padding:9px 14px;border:1px solid #c9a45b;background:#21170ee8;border-radius:8px;font-family:"DFKai-SB","KaiTi",serif;font-size:clamp(1rem,2vw,1.35rem);letter-spacing:.12em}
+    .node{position:absolute;z-index:3;border:2px solid #62431f;border-radius:7px;background:linear-gradient(145deg,#f3e5c1,#caa96f);color:#332010;padding:7px 9px;box-shadow:0 5px 13px #21140988,inset 0 0 0 2px #fff5d955;text-align:center;font-weight:800;line-height:1.2;transition:.18s}.node:hover,.node:focus-visible{transform:translateY(-3px) scale(1.04);filter:brightness(1.08);outline:3px solid #fff1b9;outline-offset:2px}.node strong{display:block;font-family:"DFKai-SB","KaiTi",serif;font-size:clamp(.82rem,1.7vw,1.2rem);letter-spacing:.08em}.node small{display:block;margin-top:4px;font-size:clamp(.62rem,1.1vw,.78rem);font-weight:700}.node.done{border-color:#852d24}.node.done small{color:#7b251e}.node.gate{background:linear-gradient(145deg,#382719,#17100b);border-color:#d2ae5d;color:#ffe8ae}.node.gate small{color:#d9c28f}
+    .node,.node.gate{padding:0;background:transparent;border:0;box-shadow:none;border-radius:12px;min-height:44px;transform:translateY(-50%);color:#fff4cf}
+    .node:hover,.node:focus-visible{transform:translateY(-50%);filter:none;outline:2px solid #f9d786;outline-offset:1px;background:#ffd67525;box-shadow:0 0 22px #ffd36ba6,inset 0 0 16px #ffe5a155}
+    .node strong,.node small{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+    .node.done::after{content:'完成';position:absolute;right:2%;bottom:100%;padding:3px 6px;border:2px double #96392a;border-radius:4px;background:#f4dfb6;color:#8b2d23;font-size:clamp(10px,1vw,15px);font-weight:900;transform:rotate(-8deg);pointer-events:none}
+    #node-couplet{left:11%;top:36%;width:21%;height:9%}#node-duel{left:11%;top:88.5%;width:21%;height:9%}#node-sage{left:75.7%;top:58.6%;width:19.5%;height:9%}#node-gate{left:41%;top:69.7%;width:20%;height:9%}
+    .legend{position:fixed;z-index:7;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;border:1px solid #a78952;background:#21170edb;border-radius:8px;color:#e9d8ad;font-size:.82rem}
+    .backdrop{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:18px;background:#0b0805dc;backdrop-filter:blur(4px)}.backdrop.open{display:flex}.gate-panel{width:min(760px,100%);max-height:94vh;overflow:auto;border:2px solid #b99651;border-radius:14px;background:linear-gradient(#efe0b9,#c8a873);color:var(--ink);box-shadow:0 20px 80px #000;padding:clamp(18px,4vw,34px);text-align:center}.gate-panel h2{margin:0 0 5px;font-family:"DFKai-SB","KaiTi",serif;font-size:clamp(1.7rem,5vw,2.7rem);letter-spacing:.12em}.lead{margin:0 0 18px;color:#57442c}.slots,.bag{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.slot-wrap label{display:block;margin-bottom:7px;font-weight:800}.slot{min-height:116px;border:3px double #6f512b;border-radius:50% 50% 43% 43%;background:#4b3822 inset;box-shadow:inset 0 9px 20px #160e0a99;display:grid;place-items:center;color:#d4bf8b;font-size:.78rem;transition:.2s}.slot.over{outline:4px solid #d5ad48;transform:scale(1.04)}.slot.locked{border-color:#275d3e;background:#397351;color:white;box-shadow:0 0 20px #3f8b5a99,inset 0 0 16px #0e3622}.slot.wrong{animation:shake .35s;border-color:#a92d24}.slot-mark{font-family:"DFKai-SB","KaiTi",serif;font-size:2rem;font-weight:900}.bag-title{margin:23px 0 9px;border-top:1px solid #7c5d34;padding-top:16px;font-weight:800}.seal{position:relative;aspect-ratio:1;max-width:130px;width:100%;margin:auto;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#c75c4b,#8d2e24 62%,#5d1713);color:#ffe9c1;box-shadow:0 7px 13px #3b1f1588,inset 0 0 0 5px #e6a88b55;display:grid;place-items:center;padding:14px;touch-action:none;user-select:none;font-family:"DFKai-SB","KaiTi",serif;font-weight:900;font-size:clamp(.85rem,2.6vw,1.15rem);line-height:1.2}.seal.selected{outline:4px solid #2e6745;outline-offset:3px}.seal.placed{visibility:hidden}.drag-ghost{position:fixed;z-index:100;pointer-events:none;opacity:.9;transform:translate(-50%,-50%) rotate(-6deg);width:100px!important}.empty-bag{grid-column:1/-1;padding:24px;color:#6b5130}.gate-status{min-height:1.5em;margin:15px 0 5px;font-weight:800;color:#7c241d}.gate-actions{display:flex;justify-content:center;gap:10px;margin-top:14px}.secondary,.primary{border-radius:7px;padding:10px 18px;font-weight:800}.secondary{border:1px solid #76562f;background:#e8d5a9;color:#352517}.primary{border:1px solid #ddb95e;background:#2d2116;color:#ffecb8}
+    .victory{position:relative;overflow:hidden}.victory::before{content:"";position:absolute;inset:0;background:url('ending.png') center/cover;opacity:.2;pointer-events:none}.victory>*{position:relative}.victory .seal-complete{width:116px;aspect-ratio:1;margin:0 auto 16px;border:7px double #a2392e;border-radius:50%;display:grid;place-items:center;color:#8d2e24;font-family:"DFKai-SB","KaiTi",serif;font-size:2rem;font-weight:900;transform:rotate(-7deg)}.time{font-size:clamp(1.8rem,7vw,3.4rem);color:#6f261e;font-weight:900;letter-spacing:.08em;margin:12px 0}.victory p{font-weight:700}
+    @keyframes shake{25%,75%{transform:translateX(-7px)}50%{transform:translateX(7px)}}
+    @media(max-width:650px){.hud{top:max(10px,env(safe-area-inset-top))}.counter,.clear{padding:7px 9px;font-size:.76rem}.slots,.bag{gap:7px}.slot{min-height:88px}.slot-mark{font-size:1.45rem}.gate-panel{padding:18px 12px}.legend{font-size:.7rem;white-space:normal;width:max-content;max-width:94vw;text-align:center}.seal{padding:8px}.gate-actions{flex-wrap:wrap}}
+    @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <button id="cover" class="cover" type="button" aria-label="開始對聯大冒險">
+    <img src="封面.png" alt="對聯大冒險。點擊任何部位遊戲開始。羊皮紙畫卷上的古城、山林、巨龍與冒險者。">
+  </button>
+
+  <main class="map-screen" aria-label="對聯大冒險地圖">
+    <div class="hud"><div class="counter">持有 <span id="sealCount">0</span>／3 印</div><button id="clearBtn" class="clear" type="button">清除進度</button></div>
+    <div class="map-frame">
+      <img class="map-art" src="map-bg.png" alt="羊皮紙地圖：左上對聯古城、左下平仄書院、右方智者試煉，以古墨路線連接中央三印大門" draggable="false">
+      <button id="node-couplet" class="node" type="button" title="對聯古城：對聯配對" data-url="../示範1_對聯配對/index.html"><strong>對聯古城</strong><small>對聯之印・<span>未完成</span></small></button>
+      <button id="node-duel" class="node" type="button" title="平仄書院：平仄對仗練習" data-url="../示範2_平仄對仗練習/index.html"><strong>平仄書院</strong><small>對仗之印・<span>未完成</span></small></button>
+      <button id="node-sage" class="node" type="button" data-url="../示範3_對聯打怪RPG/index.html"><strong>智者試煉</strong><small>智者之印・<span>未完成</span></small></button>
+      <button id="node-gate" class="node gate" type="button" title="三印大門：隨時可開啟"><strong>三印大門</strong><small>隨時可開啟</small></button>
+    </div>
+    <div class="legend">完成三關取得印章，再到通關大門嵌入正確凹槽</div>
+  </main>
+
+  <div id="gateBackdrop" class="backdrop" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <section id="gateView" class="gate-panel">
+      <h2 id="gateTitle">通關大門</h2><p class="lead">把下方持有的印章拖到對應凹槽；也可先點印章，再點凹槽。</p>
+      <div class="slots">
+        <div class="slot-wrap"><label>對聯</label><div class="slot" data-expects="couplet" tabindex="0"><span class="slot-mark">聯</span><span>凹槽</span></div></div>
+        <div class="slot-wrap"><label>對仗</label><div class="slot" data-expects="duel" tabindex="0"><span class="slot-mark">仗</span><span>凹槽</span></div></div>
+        <div class="slot-wrap"><label>智者</label><div class="slot" data-expects="sage" tabindex="0"><span class="slot-mark">智</span><span>凹槽</span></div></div>
+      </div>
+      <div class="bag-title">持有的印章</div><div id="bag" class="bag"></div>
+      <p id="gateStatus" class="gate-status" role="status"></p>
+      <div class="gate-actions"><button id="closeGate" class="secondary" type="button">回到地圖</button></div>
+    </section>
+    <section id="victoryView" class="gate-panel victory hidden">
+      <div class="seal-complete">通關</div><h2>冒險完成</h2><p>三印各歸其位，封印大門已開。</p><div class="time" id="totalTime">00：00</div><p>從冒險開始計算的總時間</p><button id="againBtn" class="primary" type="button">再次冒險</button>
+    </section>
+  </div>
+
+  <script src="ending-player.js"></script>
+  <script>
+    const PREFIX="coupletAdventure.v1.";
+    const KEYS={start:PREFIX+"startedAt",cover:PREFIX+"coverSeen",finish:PREFIX+"finishedAt",couplet:PREFIX+"seal.couplet",duel:PREFIX+"seal.duel",sage:PREFIX+"seal.sage"};
+    const INFO={couplet:{name:"對聯之印",node:"node-couplet",mark:"聯"},duel:{name:"對仗之印",node:"node-duel",mark:"仗"},sage:{name:"智者之印",node:"node-sage",mark:"智"}};
+    const cover=document.getElementById("cover"),backdrop=document.getElementById("gateBackdrop"),bag=document.getElementById("bag"),statusEl=document.getElementById("gateStatus");
+    let placed={couplet:false,duel:false,sage:false},selected=null,drag=null,suppressClick=false;
+    const earned=key=>localStorage.getItem(KEYS[key])==="earned";
+    function beginAdventure(){if(!localStorage.getItem(KEYS.start))localStorage.setItem(KEYS.start,String(Date.now()));localStorage.setItem(KEYS.cover,"seen")}
+    function hideCover(animate=true){const finish=()=>{cover.classList.add("hidden");document.querySelector(".map-screen").inert=false};if(animate){cover.classList.add("fade");setTimeout(finish,560)}else finish()}
+    function refreshMap(){let count=0;Object.entries(INFO).forEach(([key,info])=>{const node=document.getElementById(info.node),done=earned(key);node.classList.toggle("done",done);node.querySelector("small span").textContent=done?"已完成":"未完成";if(done)count++});document.getElementById("sealCount").textContent=count}
+    function resetAdventure(){Object.values(KEYS).forEach(key=>localStorage.removeItem(key));location.reload()}
+    // 只略過從同網站三個關卡返回的封面；重新整理一律重播。
+    function isReturningFromGame(){
+      const navigation=performance.getEntriesByType("navigation")[0];
+      if(navigation?.type==="reload"||!document.referrer)return false;
+      try{const previous=new URL(document.referrer);const path=decodeURIComponent(previous.pathname).replace(/\/$/,"/index.html");return previous.origin===location.origin&&["/示範1_對聯配對/index.html","/示範2_平仄對仗練習/index.html","/示範3_對聯打怪RPG/index.html"].some(game=>path.endsWith(game))}catch{return false}
+    }
+    document.querySelector(".map-screen").inert=true;
+    cover.addEventListener("click",()=>{beginAdventure();hideCover(true)});
+    if(isReturningFromGame()){beginAdventure();hideCover(false)}refreshMap();
+    document.querySelectorAll(".node[data-url]").forEach(node=>node.addEventListener("click",()=>{beginAdventure();location.href=node.dataset.url}));
+    document.getElementById("clearBtn").addEventListener("click",()=>{if(confirm("確定清除本次冒險的三枚印章、計時與封面紀錄嗎？"))resetAdventure()});
+    document.getElementById("node-gate").addEventListener("click",openGate);document.getElementById("closeGate").addEventListener("click",closeGate);backdrop.addEventListener("click",e=>{if(e.target===backdrop)closeGate()});
+    function openGate(){placed={couplet:false,duel:false,sage:false};selected=null;document.querySelectorAll(".slot").forEach(s=>{s.classList.remove("locked","wrong","over");s.querySelector("span:last-child").textContent="凹槽"});statusEl.textContent="";renderBag();document.getElementById("gateView").classList.remove("hidden");document.getElementById("victoryView").classList.add("hidden");backdrop.classList.add("open")}
+    function closeGate(){backdrop.classList.remove("open");cleanupDrag()}
+    function renderBag(){bag.replaceChildren();let total=0;Object.entries(INFO).forEach(([key,info])=>{if(!earned(key))return;total++;const seal=document.createElement("button");seal.type="button";seal.className="seal";seal.dataset.key=key;seal.innerHTML=`<span>${info.mark}<br>${info.name}</span>`;seal.addEventListener("pointerdown",startDrag);seal.addEventListener("click",()=>{if(suppressClick){suppressClick=false;return}document.querySelectorAll(".seal.selected").forEach(x=>x.classList.remove("selected"));selected=selected===key?null:key;if(selected)seal.classList.add("selected")});bag.appendChild(seal)});if(!total){const p=document.createElement("p");p.className="empty-bag";p.textContent="尚未取得印章。大門仍可查看，先完成任一關卡吧。";bag.appendChild(p)}}
+    function startDrag(e){if(e.button!==0&&e.pointerType!=="touch")return;const card=e.currentTarget;if(card.classList.contains("placed"))return;drag={card,key:card.dataset.key,id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,ghost:null};card.setPointerCapture(e.pointerId)}
+    window.addEventListener("pointermove",e=>{if(!drag||e.pointerId!==drag.id)return;if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;if(!drag.moved){drag.moved=true;drag.ghost=drag.card.cloneNode(true);drag.ghost.className="seal drag-ghost";document.body.appendChild(drag.ghost)}e.preventDefault();drag.ghost.style.left=e.clientX+"px";drag.ghost.style.top=e.clientY+"px";document.querySelectorAll(".slot.over").forEach(s=>s.classList.remove("over"));const slot=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slot");if(slot&&!slot.classList.contains("locked"))slot.classList.add("over")},{passive:false});
+    window.addEventListener("pointerup",e=>{if(!drag||e.pointerId!==drag.id)return;const key=drag.key,moved=drag.moved;const slot=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slot");cleanupDrag();if(moved){suppressClick=true;setTimeout(()=>suppressClick=false,0);if(slot)placeSeal(key,slot);else statusEl.textContent="印章已退回，請放入上方凹槽。"}});window.addEventListener("pointercancel",cleanupDrag);
+    function cleanupDrag(){if(!drag)return;drag.ghost?.remove();document.querySelectorAll(".slot.over").forEach(s=>s.classList.remove("over"));drag=null}
+    document.querySelectorAll(".slot").forEach(slot=>{slot.addEventListener("click",()=>{if(selected)placeSeal(selected,slot)});slot.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&selected){e.preventDefault();placeSeal(selected,slot)}})});
+    function placeSeal(key,slot){if(slot.classList.contains("locked"))return;if(slot.dataset.expects!==key){slot.classList.remove("wrong");void slot.offsetWidth;slot.classList.add("wrong");statusEl.textContent=`位置不對：${INFO[key].name}已退回持有區。`;return}placed[key]=true;selected=null;slot.classList.add("locked");slot.querySelector("span:last-child").textContent="已鎖定";const card=bag.querySelector(`[data-key="${key}"]`);if(card)card.classList.add("placed");statusEl.textContent=`${INFO[key].name}契合，凹槽已鎖定。`;if(Object.values(placed).every(Boolean))setTimeout(showVictory,450)}
+    function formatTime(ms){const total=Math.max(0,Math.floor(ms/1000)),hours=Math.floor(total/3600),mins=Math.floor(total%3600/60),secs=total%60;return (hours?String(hours).padStart(2,"0")+"：":"")+String(mins).padStart(2,"0")+"："+String(secs).padStart(2,"0")}
+    function showVictory(){if(!Object.values(placed).every(Boolean)||!backdrop.classList.contains("open"))return;const now=Date.now();if(!localStorage.getItem(KEYS.finish))localStorage.setItem(KEYS.finish,String(now));const start=Number(localStorage.getItem(KEYS.start))||now,finish=Number(localStorage.getItem(KEYS.finish))||now;closeGate();AdventureEnding.play({time:formatTime(finish-start),restart:resetAdventure})}
+    document.getElementById("againBtn").addEventListener("click",resetAdventure);
+    window.addEventListener("storage",refreshMap);window.addEventListener("pageshow",refreshMap);
+  </script>
+</body>
+</html>
